@@ -80,11 +80,15 @@ def main() -> int:
 
     token = os.environ.get("TELEGRAM_BOT_TOKEN")
     chat_id = os.environ.get("TELEGRAM_CHAT_ID")
-    force_notify = "--force-notify" in sys.argv
+    # При ручном запуске из вкладки Actions (workflow_dispatch) всегда шлём
+    # отчёт в Telegram, даже без изменений — иначе непонятно, сработало
+    # вообще что-то или нет.
+    force_notify = "--force-notify" in sys.argv or os.environ.get("GITHUB_EVENT_NAME") == "workflow_dispatch"
 
     state = load_state()
     changes: list[str] = []
     errors: list[str] = []
+    status_lines: list[str] = []
     now = datetime.now(timezone.utc).isoformat()
 
     programs = config.get("programs", [])
@@ -124,6 +128,16 @@ def main() -> int:
                 }
                 state[key] = curr
 
+                if result.found:
+                    status_lines.append(f"✅ {key}: место {result.rank}/{result.total}")
+                elif result.matched_context:
+                    status_lines.append(f"➖ {key}: таблица направления найдена, кода в ней нет")
+                else:
+                    status_lines.append(
+                        f"❔ {key}: не нашли таблицу по match_all={entry.get('match_all')} "
+                        f"— проверь click_text/match_all"
+                    )
+
                 change_text = describe_change(key, prev, curr)
                 if change_text:
                     changes.append(change_text)
@@ -131,6 +145,9 @@ def main() -> int:
     save_state(state)
 
     print(f"Проверено направлений: {len(programs)}")
+    print("Текущий статус по каждому направлению:")
+    for s in status_lines:
+        print(" -", s)
     print(f"Изменения: {len(changes)}")
     for c in changes:
         print(c)
@@ -146,7 +163,8 @@ def main() -> int:
             lines.append("")
             lines.extend(changes)
         else:
-            lines.append("\nБез изменений с прошлой проверки.")
+            lines.append("\nБез изменений с прошлой проверки. Текущий статус:")
+            lines.extend(status_lines)
         if errors:
             lines.append("\nОшибки при проверке:")
             lines.extend(f"- {e}" for e in errors)

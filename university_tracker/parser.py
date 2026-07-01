@@ -29,6 +29,11 @@ class LookupResult:
     rank: int | None = None
     total: int | None = None
     row: list[str] = field(default_factory=list)
+    # True, если find_applicant_by_context нашёл заголовок, подходящий под
+    # match_all, и искал именно в таблице под ним (а не откатился на поиск
+    # по всей странице). Помогает отличить "код не найден в списке" от
+    # "не нашли даже подходящую таблицу — проверь click_text/match_all".
+    matched_context: bool = False
 
 
 def _rows_from_table(table) -> list[list[str]]:
@@ -119,6 +124,7 @@ def find_applicant_by_context(html: str, code: str, context_terms: list[str]) ->
                 if table:
                     result = _scan_table(table, code)
                     if result:
+                        result.matched_context = True
                         return result
 
     return find_applicant(html, code)
