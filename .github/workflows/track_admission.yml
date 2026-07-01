@@ -38,5 +38,8 @@ jobs:
           git config user.name "admission-tracker-bot"
           git config user.email "actions@users.noreply.github.com"
           git add university_tracker/data/state.json
-          git diff --cached --quiet || git commit -m "Обновить состояние конкурсных списков"
-          git push
+          if ! git diff --cached --quiet; then
+            git commit -m "Обновить состояние конкурсных списков"
+            git pull --rebase origin main
+            git push
+          fi
