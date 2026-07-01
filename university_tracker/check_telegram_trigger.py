@@ -18,6 +18,20 @@ from pathlib import Path
 TRIGGER_TEXTS = {"/start", "/check", "/status", "/report", "проверить"}
 OFFSET_PATH = Path(__file__).parent / "data" / "telegram_offset.json"
 
+# Кнопка внизу чата шлёт обычный текст ("Проверить статус"), поэтому триггер
+# ищем подстрокой без учёта регистра, а не точным совпадением всего текста —
+# так сработает и голая команда, и кнопка, и "/start@ИмяБота" в общих чатах.
+STATUS_KEYBOARD = {
+    "keyboard": [[{"text": "Проверить статус"}]],
+    "resize_keyboard": True,
+}
+
+BOT_COMMANDS = [
+    {"command": "start", "description": "Проверить моё место в конкурсных списках"},
+    {"command": "check", "description": "Проверить моё место в конкурсных списках"},
+    {"command": "status", "description": "Показать текущий статус"},
+]
+
 
 def _get(url: str, params: dict) -> dict:
     query = urllib.parse.urlencode(params)
@@ -57,15 +71,29 @@ def evaluate_updates(updates: list, offset: int) -> tuple:
         max_update_id = max(max_update_id, update["update_id"])
         message = update.get("message") or {}
         text = (message.get("text") or "").strip().lower()
-        if text in TRIGGER_TEXTS:
+        if any(trigger in text for trigger in TRIGGER_TEXTS):
             triggered = True
             chat_id = message.get("chat", {}).get("id")
 
     return triggered, max_update_id + 1, chat_id
 
 
+def _ensure_commands_registered(token: str) -> None:
+    """Регистрирует /start, /check, /status в меню бота (значок "/" в
+    Telegram). Вызывается на каждом опросе — это дешёвый идемпотентный
+    вызов, Telegram просто перезаписывает тот же список команд."""
+    try:
+        _post(
+            f"https://api.telegram.org/bot{token}/setMyCommands",
+            {"commands": json.dumps(BOT_COMMANDS)},
+        )
+    except Exception:
+        pass
+
+
 def main() -> int:
     token = os.environ["TELEGRAM_BOT_TOKEN"]
+    _ensure_commands_registered(token)
     offset = _load_offset()
 
     data = _get(
@@ -85,6 +113,7 @@ def main() -> int:
                 {
                     "chat_id": chat_id,
                     "text": "🔎 Проверяю конкурсные списки, подожди примерно минуту...",
+                    "reply_markup": json.dumps(STATUS_KEYBOARD),
                 },
             )
         except Exception:

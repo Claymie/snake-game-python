@@ -42,9 +42,25 @@ def test_case_insensitive_and_trims_whitespace():
     assert triggered
 
 
+def test_keyboard_button_text_triggers_via_substring_match():
+    updates = [_msg(1, "Проверить статус", chat_id=42)]
+    triggered, _, chat_id = evaluate_updates(updates, offset=0)
+    assert triggered
+    assert chat_id == 42
+
+
+def test_start_with_bot_mention_suffix_triggers():
+    updates = [_msg(1, "/start@egesoon_bot", chat_id=7)]
+    triggered, _, chat_id = evaluate_updates(updates, offset=0)
+    assert triggered
+    assert chat_id == 7
+
+
 if __name__ == "__main__":
     test_no_updates_keeps_offset()
     test_unrelated_messages_do_not_trigger_but_advance_offset()
     test_start_command_triggers_and_returns_chat_id()
     test_case_insensitive_and_trims_whitespace()
+    test_keyboard_button_text_triggers_via_substring_match()
+    test_start_with_bot_mention_suffix_triggers()
     print("OK: все тесты триггера Telegram прошли")
