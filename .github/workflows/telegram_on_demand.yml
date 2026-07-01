@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       triggered: ${{ steps.check.outputs.triggered }}
+      chat_id: ${{ steps.check.outputs.chat_id }}
     steps:
       - uses: actions/checkout@v4
 
@@ -22,8 +23,9 @@ jobs:
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         run: |
-          RESULT=$(python3 check_telegram_trigger.py)
-          echo "triggered=$RESULT" >> "$GITHUB_OUTPUT"
+          mapfile -t OUTPUT < <(python3 check_telegram_trigger.py)
+          echo "triggered=${OUTPUT[0]}" >> "$GITHUB_OUTPUT"
+          echo "chat_id=${OUTPUT[1]}" >> "$GITHUB_OUTPUT"
 
       - name: Сохранить offset
         run: |
@@ -56,10 +58,9 @@ jobs:
       - name: Проверить конкурсные списки и ответить
         working-directory: university_tracker
         env:
-          APPLICANT_CODE: ${{ secrets.APPLICANT_CODE }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: python main.py --force-notify
+          TRIGGERED_CHAT_ID: ${{ needs.check-command.outputs.chat_id }}
+        run: python main.py
 
       - name: Сохранить состояние
         run: |

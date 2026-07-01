@@ -1,52 +1,54 @@
 {
-  "НГТУ (АВТФ) — 09.03.01 Информатика и вычислительная техника (платное)": {
-    "found": true,
-    "rank": 161,
-    "total": 278,
-    "row": [
-      "1339447"
-    ],
-    "url": "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.1&fk_tr_basis=2",
-    "checked_at": "2026-07-01T17:03:06.235189+00:00"
-  },
-  "НГТУ (АВТФ) — 09.03.02 Информационные системы и технологии (платное)": {
-    "found": true,
-    "rank": 107,
-    "total": 185,
-    "row": [
-      "1339447"
-    ],
-    "url": "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.2&fk_tr_basis=2",
-    "checked_at": "2026-07-01T17:03:06.235189+00:00"
-  },
-  "НГТУ (АВТФ) — 09.03.03 Прикладная информатика (платное)": {
-    "found": true,
-    "rank": 98,
-    "total": 153,
-    "row": [
-      "1339447"
-    ],
-    "url": "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.3&fk_tr_basis=2",
-    "checked_at": "2026-07-01T17:03:06.235189+00:00"
-  },
-  "НГТУ (АВТФ) — 09.03.04 Программная инженерия (платное)": {
-    "found": true,
-    "rank": 121,
-    "total": 200,
-    "row": [
-      "1339447"
-    ],
-    "url": "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.4&fk_tr_basis=2",
-    "checked_at": "2026-07-01T17:03:06.235189+00:00"
-  },
-  "НГТУ (АВТФ) — 10.03.01 Информационная безопасность (платное)": {
-    "found": true,
-    "rank": 143,
-    "total": 218,
-    "row": [
-      "1339447"
-    ],
-    "url": "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.5&fk_tr_basis=2",
-    "checked_at": "2026-07-01T17:03:06.235189+00:00"
+  "Савва": {
+    "НГТУ (АВТФ) — 09.03.01 Информатика и вычислительная техника (платное)": {
+      "found": true,
+      "rank": 161,
+      "total": 278,
+      "row": [
+        "1339447"
+      ],
+      "url": "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.1&fk_tr_basis=2",
+      "checked_at": "2026-07-01T17:03:06.235189+00:00"
+    },
+    "НГТУ (АВТФ) — 09.03.02 Информационные системы и технологии (платное)": {
+      "found": true,
+      "rank": 107,
+      "total": 185,
+      "row": [
+        "1339447"
+      ],
+      "url": "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.2&fk_tr_basis=2",
+      "checked_at": "2026-07-01T17:03:06.235189+00:00"
+    },
+    "НГТУ (АВТФ) — 09.03.03 Прикладная информатика (платное)": {
+      "found": true,
+      "rank": 98,
+      "total": 153,
+      "row": [
+        "1339447"
+      ],
+      "url": "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.3&fk_tr_basis=2",
+      "checked_at": "2026-07-01T17:03:06.235189+00:00"
+    },
+    "НГТУ (АВТФ) — 09.03.04 Программная инженерия (платное)": {
+      "found": true,
+      "rank": 121,
+      "total": 200,
+      "row": [
+        "1339447"
+      ],
+      "url": "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.4&fk_tr_basis=2",
+      "checked_at": "2026-07-01T17:03:06.235189+00:00"
+    },
+    "НГТУ (АВТФ) — 10.03.01 Информационная безопасность (платное)": {
+      "found": true,
+      "rank": 143,
+      "total": 218,
+      "row": [
+        "1339447"
+      ],
+      "url": "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.5&fk_tr_basis=2",
+      "checked_at": "2026-07-01T17:03:06.235189+00:00"
+    }
   }
 }

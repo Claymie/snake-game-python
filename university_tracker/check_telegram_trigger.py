@@ -92,7 +92,11 @@ def main() -> int:
             # равно придёт из шага respond.
             pass
 
+    # Первая строка вывода — triggered (true/false), вторая — chat_id того,
+    # кто написал команду (или пусто), чтобы main.py знал, кому персонально
+    # отвечать, а не слать полный отчёт всем зарегистрированным пользователям.
     print("true" if triggered else "false")
+    print(chat_id if chat_id is not None else "")
     return 0
 
 
