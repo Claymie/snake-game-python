@@ -1,1 +1,42 @@
-{}
+{
+  "НГТУ (АВТФ) — 09.03.01 Информатика и вычислительная техника (платное)": {
+    "found": false,
+    "rank": null,
+    "total": null,
+    "row": [],
+    "url": "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor",
+    "checked_at": "2026-07-01T16:40:15.018457+00:00"
+  },
+  "НГТУ (АВТФ) — 09.03.02 Информационные системы и технологии (платное)": {
+    "found": false,
+    "rank": null,
+    "total": null,
+    "row": [],
+    "url": "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor",
+    "checked_at": "2026-07-01T16:40:15.018457+00:00"
+  },
+  "НГТУ (АВТФ) — 09.03.03 Прикладная информатика (платное)": {
+    "found": false,
+    "rank": null,
+    "total": null,
+    "row": [],
+    "url": "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor",
+    "checked_at": "2026-07-01T16:40:15.018457+00:00"
+  },
+  "НГТУ (АВТФ) — 09.03.04 Программная инженерия (платное)": {
+    "found": false,
+    "rank": null,
+    "total": null,
+    "row": [],
+    "url": "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor",
+    "checked_at": "2026-07-01T16:40:15.018457+00:00"
+  },
+  "НГТУ (АВТФ) — 10.03.01 Информационная безопасность (платное)": {
+    "found": false,
+    "rank": null,
+    "total": null,
+    "row": [],
+    "url": "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor",
+    "checked_at": "2026-07-01T16:40:15.018457+00:00"
+  }
+}
