@@ -158,6 +158,33 @@ def test_id_epgu_no_list_on_page():
     assert not result.matched_context
 
 
+NSTU_CARD_HTML_WITH_QUOTA = """
+<html><body>
+<div>09.03.02</div>
+<div>Всего мест 25</div>
+<div class="card">
+  <div>ID профиля ЕПГУ: 2210001</div>
+</div>
+<div class="card">
+  <div>ID профиля ЕПГУ: 1339447</div>
+</div>
+</body></html>
+"""
+
+
+def test_id_epgu_extracts_quota():
+    result = find_applicant_by_id_epgu(NSTU_CARD_HTML_WITH_QUOTA, "1339447")
+    assert result.found
+    assert result.rank == 2
+    assert result.quota == 25
+
+
+def test_id_epgu_quota_missing_is_none():
+    result = find_applicant_by_id_epgu(NSTU_CARD_HTML, "1339447")
+    assert result.found
+    assert result.quota is None
+
+
 if __name__ == "__main__":
     test_finds_rank_from_leading_numeric_column()
     test_finds_rank_by_row_position_when_no_numeric_column()
@@ -168,4 +195,6 @@ if __name__ == "__main__":
     test_id_epgu_finds_rank_by_document_order()
     test_id_epgu_not_found_reports_total()
     test_id_epgu_no_list_on_page()
+    test_id_epgu_extracts_quota()
+    test_id_epgu_quota_missing_is_none()
     print("OK: все тесты парсера прошли")

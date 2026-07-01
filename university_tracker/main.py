@@ -71,11 +71,24 @@ def program_key(entry: dict) -> str:
     return f'{entry["university"]} — {entry["specialty"]} ({entry.get("form", "?")})'
 
 
+def _place_text(rank: int | None, total: int | None, quota: int | None) -> str:
+    """Квота ("Всего мест") — это реальный потолок зачисления на платное,
+    а не число участников конкурса, поэтому именно с ней сравниваем место,
+    если она нашлась на странице. Число участников показываем отдельно,
+    для справки."""
+    if quota is not None:
+        passing = " ✅ проходит" if rank is not None and rank <= quota else " ⚠️ пока не проходит"
+        extra = f", всего заявок: {total}" if total is not None else ""
+        return f"место {rank} из {quota} мест{extra}{passing}"
+    return f"место {rank}/{total}"
+
+
 def status_line(key: str, mode: str, entry: dict, result: LookupResult) -> str:
     if result.found:
-        return f"✅ {key}: место {result.rank}/{result.total}"
+        return f"✅ {key}: {_place_text(result.rank, result.total, result.quota)}"
     if result.matched_context:
-        return f"➖ {key}: список найден ({result.total} чел.), кода в нём нет"
+        quota_text = f", мест: {result.quota}" if result.quota is not None else ""
+        return f"➖ {key}: список найден ({result.total} чел.{quota_text}), кода в нём нет"
     if mode == "id_epgu":
         return f"❔ {key}: не нашли на странице ни одной записи 'ID профиля ЕПГУ'"
     return (
@@ -89,15 +102,14 @@ def describe_change(key: str, prev: dict | None, curr: dict) -> str | None:
     now_found = curr["found"]
 
     if now_found and not was_found:
-        if curr["rank"] is not None and curr["total"] is not None:
-            return f"✅ {key}\n   Появился в списке: место {curr['rank']} из {curr['total']}"
+        if curr["rank"] is not None:
+            place = _place_text(curr["rank"], curr["total"], curr.get("quota"))
+            return f"✅ {key}\n   Появился в списке: {place}"
         return f"✅ {key}\n   Появился в списке (место определить не удалось, см. лог)"
 
     if now_found and was_found and prev.get("rank") != curr["rank"]:
-        return (
-            f"🔄 {key}\n   Место изменилось: {prev.get('rank')} → {curr['rank']} "
-            f"(из {curr['total']})"
-        )
+        place = _place_text(curr["rank"], curr["total"], curr.get("quota"))
+        return f"🔄 {key}\n   Место изменилось: {prev.get('rank')} → {curr['rank']} ({place})"
 
     if was_found and not now_found:
         return f"⚠️ {key}\n   Пропал из списка (был на месте {prev.get('rank')})"
@@ -201,6 +213,7 @@ def main() -> int:
                 "found": result.found,
                 "rank": result.rank,
                 "total": result.total,
+                "quota": result.quota,
                 "row": result.row,
                 "url": entry.get("url"),
                 "checked_at": now,
