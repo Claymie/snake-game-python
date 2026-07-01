@@ -13,13 +13,14 @@ from __future__ import annotations
 import json
 import os
 import sys
+from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
 import yaml
 
 from fetcher import PageFetcher
-from parser import find_applicant
+from parser import find_applicant_by_context
 from telegram import send_message
 
 BASE_DIR = Path(__file__).parent
@@ -86,39 +87,50 @@ def main() -> int:
     errors: list[str] = []
     now = datetime.now(timezone.utc).isoformat()
 
+    programs = config.get("programs", [])
+
+    # Несколько направлений могут находиться на одной и той же странице
+    # (например, все программы одного факультета показываются после клика
+    # по вкладке факультета). Группируем по (url, click_text), чтобы не
+    # открывать и не кликать по одной и той же странице повторно.
+    groups: dict[tuple[str, str | None], list[dict]] = defaultdict(list)
+    for entry in programs:
+        url = entry.get("url")
+        if not url:
+            errors.append(f"{program_key(entry)}: не указан url в config.yaml")
+            continue
+        groups[(url, entry.get("click_text"))].append(entry)
+
     with PageFetcher() as fetcher:
-        for entry in config.get("programs", []):
-            key = program_key(entry)
-            url = entry.get("url")
-            if not url:
-                errors.append(f"{key}: не указан url в config.yaml")
-                continue
-
+        for (url, click_text), entries in groups.items():
             try:
-                html = fetcher.get_html(url)
+                html = fetcher.get_html(url, click_text=click_text)
             except Exception as exc:  # noqa: BLE001 - хотим залогировать любую ошибку сети
-                errors.append(f"{key}: ошибка загрузки страницы — {exc}")
+                for entry in entries:
+                    errors.append(f"{program_key(entry)}: ошибка загрузки страницы — {exc}")
                 continue
 
-            result = find_applicant(html, code)
-            prev = state.get(key)
-            curr = {
-                "found": result.found,
-                "rank": result.rank,
-                "total": result.total,
-                "row": result.row,
-                "url": url,
-                "checked_at": now,
-            }
-            state[key] = curr
+            for entry in entries:
+                key = program_key(entry)
+                result = find_applicant_by_context(html, code, entry.get("match_all", []))
+                prev = state.get(key)
+                curr = {
+                    "found": result.found,
+                    "rank": result.rank,
+                    "total": result.total,
+                    "row": result.row,
+                    "url": url,
+                    "checked_at": now,
+                }
+                state[key] = curr
 
-            change_text = describe_change(key, prev, curr)
-            if change_text:
-                changes.append(change_text)
+                change_text = describe_change(key, prev, curr)
+                if change_text:
+                    changes.append(change_text)
 
     save_state(state)
 
-    print(f"Проверено направлений: {len(config.get('programs', []))}")
+    print(f"Проверено направлений: {len(programs)}")
     print(f"Изменения: {len(changes)}")
     for c in changes:
         print(c)
