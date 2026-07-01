@@ -23,3 +23,9 @@ def send_message(token: str, chat_id: str, text: str, with_keyboard: bool = True
         data["reply_markup"] = json.dumps(STATUS_KEYBOARD)
     resp = requests.post(url, data=data, timeout=15)
     resp.raise_for_status()
+    # Telegram может вернуть HTTP 200 с {"ok": false, ...} на невалидный
+    # запрос (например, битый reply_markup) — raise_for_status() это не
+    # ловит, а тогда сообщение молча не доходит и мы об этом не узнаём.
+    payload = resp.json()
+    if not payload.get("ok"):
+        raise RuntimeError(f"Telegram sendMessage вернул ok=false: {payload}")
