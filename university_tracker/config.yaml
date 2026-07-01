@@ -33,6 +33,7 @@ programs:
     url: "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.1&fk_tr_basis=2"
     mode: "id_epgu"
     autoscroll: true
+    quota: 80
 
   - university: "НГТУ (АВТФ)"
     specialty: "09.03.02 Информационные системы и технологии"
@@ -40,6 +41,7 @@ programs:
     url: "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.2&fk_tr_basis=2"
     mode: "id_epgu"
     autoscroll: true
+    quota: 25
 
   - university: "НГТУ (АВТФ)"
     specialty: "09.03.03 Прикладная информатика"
@@ -47,6 +49,7 @@ programs:
     url: "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.3&fk_tr_basis=2"
     mode: "id_epgu"
     autoscroll: true
+    quota: 25
 
   - university: "НГТУ (АВТФ)"
     specialty: "09.03.04 Программная инженерия"
@@ -54,6 +57,7 @@ programs:
     url: "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.4&fk_tr_basis=2"
     mode: "id_epgu"
     autoscroll: true
+    quota: 75
 
   - university: "НГТУ (АВТФ)"
     specialty: "10.03.01 Информационная безопасность"
@@ -61,3 +65,4 @@ programs:
     url: "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.5&fk_tr_basis=2"
     mode: "id_epgu"
     autoscroll: true
+    quota: 55
