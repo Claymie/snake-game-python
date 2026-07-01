@@ -30,6 +30,7 @@ jobs:
           APPLICANT_CODE: ${{ secrets.APPLICANT_CODE }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
         run: python main.py
 
       - name: Сохранить состояние
