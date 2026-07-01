@@ -11,7 +11,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from parser import find_applicant
+from parser import find_applicant, find_applicant_by_context
 
 TABLE_HTML = """
 <html><body>
@@ -50,6 +50,24 @@ NOT_FOUND_HTML = """
 </body></html>
 """
 
+MULTI_TABLE_HTML = """
+<html><body>
+<h3>09.03.01 Информатика и вычислительная техника (платное)</h3>
+<table>
+  <tr><th>№</th><th>Код</th><th>Баллы</th></tr>
+  <tr><td>1</td><td>7777777</td><td>270</td></tr>
+  <tr><td>2</td><td>1339447</td><td>260</td></tr>
+</table>
+<h3>09.03.02 Информационные системы и технологии (платное)</h3>
+<table>
+  <tr><th>№</th><th>Код</th><th>Баллы</th></tr>
+  <tr><td>1</td><td>1339447</td><td>250</td></tr>
+  <tr><td>2</td><td>8888888</td><td>240</td></tr>
+  <tr><td>3</td><td>9999999</td><td>230</td></tr>
+</table>
+</body></html>
+"""
+
 
 def test_finds_rank_from_leading_numeric_column():
     result = find_applicant(TABLE_HTML, "1339447")
@@ -78,9 +96,29 @@ def test_not_found_returns_false():
     assert result.rank is None
 
 
+def test_context_picks_correct_table_among_several():
+    result_01 = find_applicant_by_context(MULTI_TABLE_HTML, "1339447", ["09.03.01"])
+    assert result_01.found
+    assert result_01.rank == 2
+    assert result_01.total == 2
+
+    result_02 = find_applicant_by_context(MULTI_TABLE_HTML, "1339447", ["09.03.02"])
+    assert result_02.found
+    assert result_02.rank == 1
+    assert result_02.total == 3
+
+
+def test_context_falls_back_when_heading_not_found():
+    result = find_applicant_by_context(TABLE_HTML, "1339447", ["09.03.09"])
+    assert result.found
+    assert result.rank == 2
+
+
 if __name__ == "__main__":
     test_finds_rank_from_leading_numeric_column()
     test_finds_rank_by_row_position_when_no_numeric_column()
     test_falls_back_to_plain_text_search()
     test_not_found_returns_false()
+    test_context_picks_correct_table_among_several()
+    test_context_falls_back_when_heading_not_found()
     print("OK: все тесты парсера прошли")

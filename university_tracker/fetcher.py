@@ -34,11 +34,19 @@ class PageFetcher:
         if self._playwright:
             self._playwright.stop()
 
-    def get_html(self, url: str, timeout_ms: int = 45000) -> str:
+    def get_html(self, url: str, click_text: str | None = None, timeout_ms: int = 45000) -> str:
         assert self._browser is not None
-        page = self._browser.new_page(user_agent=USER_AGENT)
+        page = self._browser.new_page(user_agent=USER_AGENT, locale="ru-RU")
         try:
             page.goto(url, wait_until="networkidle", timeout=timeout_ms)
+            if click_text:
+                try:
+                    page.get_by_text(click_text, exact=False).first.click(timeout=10000)
+                    page.wait_for_load_state("networkidle", timeout=timeout_ms)
+                except Exception:
+                    # Не смогли найти/кликнуть вкладку — работаем с тем, что уже
+                    # загружено, а не роняем весь прогон.
+                    pass
             return page.content()
         finally:
             page.close()
