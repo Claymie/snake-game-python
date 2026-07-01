@@ -28,6 +28,11 @@ HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6", "caption", "strong", "b", "s
 # в документе соответствует месту в конкурсном списке.
 ID_EPGU_PATTERN = re.compile(r"ID\s*профиля\s*ЕПГУ\s*:?\s*([0-9]+)", re.IGNORECASE)
 
+# "Всего мест" — это квота (сколько реально зачислят на платное по этому
+# направлению), а не число участников конкурса. Именно с этим числом нужно
+# сравнивать место абитуриента, чтобы понять, проходит он или нет.
+QUOTA_PATTERN = re.compile(r"всего\s*мест\D{0,10}?([0-9]+)", re.IGNORECASE)
+
 
 @dataclass
 class LookupResult:
@@ -40,6 +45,9 @@ class LookupResult:
     # по всей странице). Помогает отличить "код не найден в списке" от
     # "не нашли даже подходящую таблицу — проверь click_text/match_all".
     matched_context: bool = False
+    # Квота ("Всего мест") — сколько мест реально выделено на направление,
+    # если её удалось найти на странице.
+    quota: int | None = None
 
 
 def _rows_from_table(table) -> list[list[str]]:
@@ -145,12 +153,18 @@ def find_applicant_by_id_epgu(html: str, code: str) -> LookupResult:
     soup = BeautifulSoup(html, "html.parser")
     text = soup.get_text("\n")
     matches = ID_EPGU_PATTERN.findall(text)
+
+    quota_match = QUOTA_PATTERN.search(text)
+    quota = int(quota_match.group(1)) if quota_match else None
+
     if not matches:
-        return LookupResult(found=False)
+        return LookupResult(found=False, quota=quota)
 
     total = len(matches)
     for idx, applicant_code in enumerate(matches, start=1):
         if applicant_code == code:
-            return LookupResult(found=True, rank=idx, total=total, row=[applicant_code], matched_context=True)
+            return LookupResult(
+                found=True, rank=idx, total=total, row=[applicant_code], matched_context=True, quota=quota
+            )
 
-    return LookupResult(found=False, total=total, matched_context=True)
+    return LookupResult(found=False, total=total, matched_context=True, quota=quota)
