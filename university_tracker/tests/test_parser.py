@@ -11,7 +11,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from parser import find_applicant, find_applicant_by_context
+from parser import find_applicant, find_applicant_by_context, find_applicant_by_id_epgu
 
 TABLE_HTML = """
 <html><body>
@@ -114,6 +114,50 @@ def test_context_falls_back_when_heading_not_found():
     assert result.rank == 2
 
 
+NSTU_CARD_HTML = """
+<html><body>
+<div class="card">
+  <div class="badge">1</div>
+  <div class="code">2210001</div>
+  <div>ID профиля ЕПГУ: 2210001</div>
+  <div>Общий балл: 290</div>
+</div>
+<div class="card">
+  <div class="badge">143</div>
+  <div class="code">1339447</div>
+  <div>ID профиля ЕПГУ: 1339447</div>
+  <div>Общий балл: 171</div>
+</div>
+<div class="card">
+  <div class="badge">200</div>
+  <div class="code">4455123</div>
+  <div>ID профиля ЕПГУ: 4455123</div>
+  <div>Общий балл: 100</div>
+</div>
+</body></html>
+"""
+
+
+def test_id_epgu_finds_rank_by_document_order():
+    result = find_applicant_by_id_epgu(NSTU_CARD_HTML, "1339447")
+    assert result.found
+    assert result.rank == 2
+    assert result.total == 3
+
+
+def test_id_epgu_not_found_reports_total():
+    result = find_applicant_by_id_epgu(NSTU_CARD_HTML, "9999999")
+    assert not result.found
+    assert result.matched_context
+    assert result.total == 3
+
+
+def test_id_epgu_no_list_on_page():
+    result = find_applicant_by_id_epgu(DIV_HTML, "1339447")
+    assert not result.found
+    assert not result.matched_context
+
+
 if __name__ == "__main__":
     test_finds_rank_from_leading_numeric_column()
     test_finds_rank_by_row_position_when_no_numeric_column()
@@ -121,4 +165,7 @@ if __name__ == "__main__":
     test_not_found_returns_false()
     test_context_picks_correct_table_among_several()
     test_context_falls_back_when_heading_not_found()
+    test_id_epgu_finds_rank_by_document_order()
+    test_id_epgu_not_found_reports_total()
+    test_id_epgu_no_list_on_page()
     print("OK: все тесты парсера прошли")

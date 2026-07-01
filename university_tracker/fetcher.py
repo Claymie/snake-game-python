@@ -34,7 +34,13 @@ class PageFetcher:
         if self._playwright:
             self._playwright.stop()
 
-    def get_html(self, url: str, click_text: str | None = None, timeout_ms: int = 45000) -> str:
+    def get_html(
+        self,
+        url: str,
+        click_text: str | None = None,
+        autoscroll: bool = False,
+        timeout_ms: int = 45000,
+    ) -> str:
         assert self._browser is not None
         page = self._browser.new_page(user_agent=USER_AGENT, locale="ru-RU")
         try:
@@ -47,6 +53,27 @@ class PageFetcher:
                     # Не смогли найти/кликнуть вкладку — работаем с тем, что уже
                     # загружено, а не роняем весь прогон.
                     pass
+            if autoscroll:
+                self._autoscroll(page)
             return page.content()
         finally:
             page.close()
+
+    @staticmethod
+    def _autoscroll(page, max_rounds: int = 25, pause_ms: int = 400) -> None:
+        """Некоторые списки подгружают карточки по мере прокрутки страницы
+        (бесконечный скролл) — прокручиваем вниз, пока высота страницы
+        перестанет расти."""
+        last_height = -1
+        stable_rounds = 0
+        for _ in range(max_rounds):
+            height = page.evaluate("document.body.scrollHeight")
+            if height == last_height:
+                stable_rounds += 1
+                if stable_rounds >= 2:
+                    break
+            else:
+                stable_rounds = 0
+            last_height = height
+            page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+            page.wait_for_timeout(pause_ms)

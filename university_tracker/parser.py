@@ -16,11 +16,17 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 
 from bs4 import BeautifulSoup
 
 HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6", "caption", "strong", "b", "summary"]
+
+# Список НГТУ выводит каждого абитуриента отдельной карточкой (не таблицей)
+# с явной подписью "ID профиля ЕПГУ: <код>" — по ней и ищем, порядок карточек
+# в документе соответствует месту в конкурсном списке.
+ID_EPGU_PATTERN = re.compile(r"ID\s*профиля\s*ЕПГУ\s*:?\s*([0-9]+)", re.IGNORECASE)
 
 
 @dataclass
@@ -128,3 +134,23 @@ def find_applicant_by_context(html: str, code: str, context_terms: list[str]) ->
                         return result
 
     return find_applicant(html, code)
+
+
+def find_applicant_by_id_epgu(html: str, code: str) -> LookupResult:
+    """Парсер под конкурсные списки НГТУ: каждая запись — карточка с текстом
+    вида "ID профиля ЕПГУ: 1339447", без <table>. Порядок карточек в
+    документе = место в конкурсном списке (список уже отсортирован по
+    баллам сайтом)."""
+
+    soup = BeautifulSoup(html, "html.parser")
+    text = soup.get_text("\n")
+    matches = ID_EPGU_PATTERN.findall(text)
+    if not matches:
+        return LookupResult(found=False)
+
+    total = len(matches)
+    for idx, applicant_code in enumerate(matches, start=1):
+        if applicant_code == code:
+            return LookupResult(found=True, rank=idx, total=total, row=[applicant_code], matched_context=True)
+
+    return LookupResult(found=False, total=total, matched_context=True)
