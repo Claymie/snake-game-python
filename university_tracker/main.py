@@ -208,6 +208,11 @@ def main() -> int:
                 continue
             result = per_user[user_name]
             mode = entry.get("mode", "context")
+            # Квота на сайте не всегда парсится надёжно (или её вообще нет на
+            # странице), а число мест фиксировано на всю приёмную кампанию —
+            # значение из config.yaml приоритетнее того, что нашли на странице.
+            if entry.get("quota") is not None:
+                result.quota = entry["quota"]
 
             curr = {
                 "found": result.found,
