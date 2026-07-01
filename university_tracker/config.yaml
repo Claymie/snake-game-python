@@ -22,9 +22,9 @@ users:
     applicant_code: "1339447"
     chat_id: "1380761761"
 
-  # - name: "Друг"
-  #   applicant_code: "0000000"
-  #   chat_id: "0000000000"
+  - name: "Борис"
+    applicant_code: "1351291"
+    chat_id: "1066812942"
 
 programs:
   - university: "НГТУ (АВТФ)"
