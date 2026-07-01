@@ -1,15 +1,13 @@
 # Список направлений, по которым нужно отслеживать место в конкурсном списке.
 #
-# Все 5 направлений сейчас находятся на одной странице НГТУ: сначала
-# скрипт открывает "url", затем кликает по вкладке/ссылке с текстом
-# "click_text" (факультет АВТФ), и на получившейся странице ищет таблицу,
-# заголовок над которой содержит ВСЕ строки из "match_all" (обычно это
-# просто код направления, например "09.03.01").
+# У каждого направления НГТУ теперь своя прямая ссылка (спасибо, так гораздо
+# надёжнее). Список на странице — не HTML-таблица, а карточки вида
+# "ID профиля ЕПГУ: 1339447" — за это отвечает mode: "id_epgu" в parser.py:
+# порядок карточек на странице = место в конкурсном списке.
 #
-# Если после первого реального прогона окажется, что название направления
-# на странице выглядит иначе, чем просто код (например код не встречается
-# в заголовке таблицы, а только в тексте программы) — пришли мне лог, и я
-# поправлю match_all под реальную вёрстку страницы.
+# autoscroll: true — на случай, если карточки подгружаются по мере прокрутки
+# (бесконечный скролл); если список целиком в HTML сразу, эта прокрутка
+# просто ничего не изменит и завершится за пару итераций.
 
 applicant_code: "1339447"  # можно оставить тут для локального запуска;
                             # в GitHub Actions значение берётся из секрета APPLICANT_CODE
@@ -18,34 +16,34 @@ programs:
   - university: "НГТУ (АВТФ)"
     specialty: "09.03.01 Информатика и вычислительная техника"
     form: "платное"
-    url: "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor"
-    click_text: "АВТФ"
-    match_all: ["09.03.01"]
+    url: "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.1&fk_tr_basis=2"
+    mode: "id_epgu"
+    autoscroll: true
 
   - university: "НГТУ (АВТФ)"
     specialty: "09.03.02 Информационные системы и технологии"
     form: "платное"
-    url: "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor"
-    click_text: "АВТФ"
-    match_all: ["09.03.02"]
+    url: "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.2&fk_tr_basis=2"
+    mode: "id_epgu"
+    autoscroll: true
 
   - university: "НГТУ (АВТФ)"
     specialty: "09.03.03 Прикладная информатика"
     form: "платное"
-    url: "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor"
-    click_text: "АВТФ"
-    match_all: ["09.03.03"]
+    url: "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.3&fk_tr_basis=2"
+    mode: "id_epgu"
+    autoscroll: true
 
   - university: "НГТУ (АВТФ)"
     specialty: "09.03.04 Программная инженерия"
     form: "платное"
-    url: "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor"
-    click_text: "АВТФ"
-    match_all: ["09.03.04"]
+    url: "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.4&fk_tr_basis=2"
+    mode: "id_epgu"
+    autoscroll: true
 
   - university: "НГТУ (АВТФ)"
     specialty: "10.03.01 Информационная безопасность"
     form: "платное"
-    url: "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor"
-    click_text: "АВТФ"
-    match_all: ["10.03.01"]
+    url: "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.5&fk_tr_basis=2"
+    mode: "id_epgu"
+    autoscroll: true

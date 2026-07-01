@@ -1,0 +1,73 @@
+name: Ответ боту в Telegram по запросу
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  check-command:
+    runs-on: ubuntu-latest
+    outputs:
+      triggered: ${{ steps.check.outputs.triggered }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Проверить, не написали ли боту команду
+        id: check
+        working-directory: university_tracker
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        run: |
+          RESULT=$(python3 check_telegram_trigger.py)
+          echo "triggered=$RESULT" >> "$GITHUB_OUTPUT"
+
+      - name: Сохранить offset
+        run: |
+          git config user.name "admission-tracker-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add university_tracker/data/telegram_offset.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Обновить offset Telegram"
+            git pull --rebase origin main
+            git push
+          fi
+
+  respond:
+    needs: check-command
+    if: needs.check-command.outputs.triggered == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        working-directory: university_tracker
+        run: |
+          pip install -r requirements.txt
+          python -m playwright install --with-deps chromium
+
+      - name: Проверить конкурсные списки и ответить
+        working-directory: university_tracker
+        env:
+          APPLICANT_CODE: ${{ secrets.APPLICANT_CODE }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python main.py --force-notify
+
+      - name: Сохранить состояние
+        run: |
+          git config user.name "admission-tracker-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add university_tracker/data/state.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Обновить состояние (по запросу из Telegram)"
+            git pull --rebase origin main
+            git push
+          fi

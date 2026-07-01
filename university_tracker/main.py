@@ -20,7 +20,7 @@ from pathlib import Path
 import yaml
 
 from fetcher import PageFetcher
-from parser import find_applicant_by_context
+from parser import find_applicant_by_context, find_applicant_by_id_epgu
 from telegram import send_message
 
 BASE_DIR = Path(__file__).parent
@@ -107,8 +107,9 @@ def main() -> int:
 
     with PageFetcher() as fetcher:
         for (url, click_text), entries in groups.items():
+            autoscroll = any(entry.get("autoscroll") for entry in entries)
             try:
-                html = fetcher.get_html(url, click_text=click_text)
+                html = fetcher.get_html(url, click_text=click_text, autoscroll=autoscroll)
             except Exception as exc:  # noqa: BLE001 - хотим залогировать любую ошибку сети
                 for entry in entries:
                     errors.append(f"{program_key(entry)}: ошибка загрузки страницы — {exc}")
@@ -116,7 +117,11 @@ def main() -> int:
 
             for entry in entries:
                 key = program_key(entry)
-                result = find_applicant_by_context(html, code, entry.get("match_all", []))
+                mode = entry.get("mode", "context")
+                if mode == "id_epgu":
+                    result = find_applicant_by_id_epgu(html, code)
+                else:
+                    result = find_applicant_by_context(html, code, entry.get("match_all", []))
                 prev = state.get(key)
                 curr = {
                     "found": result.found,
@@ -131,7 +136,9 @@ def main() -> int:
                 if result.found:
                     status_lines.append(f"✅ {key}: место {result.rank}/{result.total}")
                 elif result.matched_context:
-                    status_lines.append(f"➖ {key}: таблица направления найдена, кода в ней нет")
+                    status_lines.append(f"➖ {key}: список найден ({result.total} чел.), кода в нём нет")
+                elif mode == "id_epgu":
+                    status_lines.append(f"❔ {key}: не нашли на странице ни одной записи 'ID профиля ЕПГУ'")
                 else:
                     status_lines.append(
                         f"❔ {key}: не нашли таблицу по match_all={entry.get('match_all')} "
