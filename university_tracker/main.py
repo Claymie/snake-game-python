@@ -1,11 +1,15 @@
-"""Точка входа: проверяет место абитуриента во всех сконфигурированных
-конкурсных списках и шлёт уведомление в Telegram, если что-то изменилось.
+"""Точка входа: проверяет место каждого зарегистрированного пользователя
+(config.yaml -> users) во всех сконфигурированных конкурсных списках и
+шлёт каждому уведомление в Telegram при изменениях.
 
 Запуск:
-    APPLICANT_CODE=1339447 \
     TELEGRAM_BOT_TOKEN=... \
-    TELEGRAM_CHAT_ID=... \
     python main.py [--force-notify]
+
+Переменная окружения TRIGGERED_CHAT_ID (её проставляет workflow при
+срабатывании на команду из Telegram) заставляет отправить полный отчёт
+только этому чату, даже без изменений — остальные пользователи в этом
+случае получают уведомление, только если у них реально что-то изменилось.
 """
 
 from __future__ import annotations
@@ -20,17 +24,34 @@ from pathlib import Path
 import yaml
 
 from fetcher import PageFetcher
-from parser import find_applicant_by_context, find_applicant_by_id_epgu
+from parser import LookupResult, find_applicant_by_context, find_applicant_by_id_epgu
 from telegram import send_message
 
 BASE_DIR = Path(__file__).parent
 CONFIG_PATH = BASE_DIR / "config.yaml"
 STATE_PATH = BASE_DIR / "data" / "state.json"
 
+NOT_REGISTERED_TEXT = (
+    "Этот чат не привязан ни к одному отслеживаемому профилю. "
+    "Попроси владельца бота добавить твой код и chat_id в config.yaml."
+)
+
 
 def load_config() -> dict:
     with open(CONFIG_PATH, encoding="utf-8") as f:
         return yaml.safe_load(f)
+
+
+def load_users(config: dict) -> list[dict]:
+    users = config.get("users") or []
+    if users:
+        return users
+    # Обратная совместимость со старой схемой на одного пользователя.
+    code = os.environ.get("APPLICANT_CODE") or str(config.get("applicant_code", "")).strip()
+    chat_id = os.environ.get("TELEGRAM_CHAT_ID")
+    if code and chat_id:
+        return [{"name": "default", "applicant_code": code, "chat_id": chat_id}]
+    return []
 
 
 def load_state() -> dict:
@@ -48,6 +69,19 @@ def save_state(state: dict) -> None:
 
 def program_key(entry: dict) -> str:
     return f'{entry["university"]} — {entry["specialty"]} ({entry.get("form", "?")})'
+
+
+def status_line(key: str, mode: str, entry: dict, result: LookupResult) -> str:
+    if result.found:
+        return f"✅ {key}: место {result.rank}/{result.total}"
+    if result.matched_context:
+        return f"➖ {key}: список найден ({result.total} чел.), кода в нём нет"
+    if mode == "id_epgu":
+        return f"❔ {key}: не нашли на странице ни одной записи 'ID профиля ЕПГУ'"
+    return (
+        f"❔ {key}: не нашли таблицу по match_all={entry.get('match_all')} "
+        f"— проверь click_text/match_all"
+    )
 
 
 def describe_change(key: str, prev: dict | None, curr: dict) -> str | None:
@@ -71,32 +105,14 @@ def describe_change(key: str, prev: dict | None, curr: dict) -> str | None:
     return None
 
 
-def main() -> int:
-    config = load_config()
-    code = os.environ.get("APPLICANT_CODE") or str(config.get("applicant_code", "")).strip()
-    if not code:
-        print("Не задан код абитуриента (APPLICANT_CODE или applicant_code в config.yaml)")
-        return 1
-
-    token = os.environ.get("TELEGRAM_BOT_TOKEN")
-    chat_id = os.environ.get("TELEGRAM_CHAT_ID")
-    # При ручном запуске из вкладки Actions (workflow_dispatch) всегда шлём
-    # отчёт в Telegram, даже без изменений — иначе непонятно, сработало
-    # вообще что-то или нет.
-    force_notify = "--force-notify" in sys.argv or os.environ.get("GITHUB_EVENT_NAME") == "workflow_dispatch"
-
-    state = load_state()
-    changes: list[str] = []
-    errors: list[str] = []
-    status_lines: list[str] = []
-    now = datetime.now(timezone.utc).isoformat()
+def fetch_program_results(config: dict, users: list[dict], errors: list[str]) -> dict[str, dict[str, LookupResult]]:
+    """Возвращает {program_key: {user_name: LookupResult}}. Каждая страница
+    открывается ровно один раз за прогон, даже если пользователей и/или
+    направлений на этой странице несколько — код каждого пользователя
+    ищется в уже загруженном HTML, это не стоит лишних запросов."""
 
     programs = config.get("programs", [])
 
-    # Несколько направлений могут находиться на одной и той же странице
-    # (например, все программы одного факультета показываются после клика
-    # по вкладке факультета). Группируем по (url, click_text), чтобы не
-    # открывать и не кликать по одной и той же странице повторно.
     groups: dict[tuple[str, str | None], list[dict]] = defaultdict(list)
     for entry in programs:
         url = entry.get("url")
@@ -104,6 +120,8 @@ def main() -> int:
             errors.append(f"{program_key(entry)}: не указан url в config.yaml")
             continue
         groups[(url, entry.get("click_text"))].append(entry)
+
+    results: dict[str, dict[str, LookupResult]] = {}
 
     with PageFetcher() as fetcher:
         for (url, click_text), entries in groups.items():
@@ -118,67 +136,112 @@ def main() -> int:
             for entry in entries:
                 key = program_key(entry)
                 mode = entry.get("mode", "context")
-                if mode == "id_epgu":
-                    result = find_applicant_by_id_epgu(html, code)
-                else:
-                    result = find_applicant_by_context(html, code, entry.get("match_all", []))
-                prev = state.get(key)
-                curr = {
-                    "found": result.found,
-                    "rank": result.rank,
-                    "total": result.total,
-                    "row": result.row,
-                    "url": url,
-                    "checked_at": now,
-                }
-                state[key] = curr
+                per_user: dict[str, LookupResult] = {}
+                for user in users:
+                    code = str(user["applicant_code"])
+                    if mode == "id_epgu":
+                        per_user[user["name"]] = find_applicant_by_id_epgu(html, code)
+                    else:
+                        per_user[user["name"]] = find_applicant_by_context(
+                            html, code, entry.get("match_all", [])
+                        )
+                results[key] = per_user
 
-                if result.found:
-                    status_lines.append(f"✅ {key}: место {result.rank}/{result.total}")
-                elif result.matched_context:
-                    status_lines.append(f"➖ {key}: список найден ({result.total} чел.), кода в нём нет")
-                elif mode == "id_epgu":
-                    status_lines.append(f"❔ {key}: не нашли на странице ни одной записи 'ID профиля ЕПГУ'")
-                else:
-                    status_lines.append(
-                        f"❔ {key}: не нашли таблицу по match_all={entry.get('match_all')} "
-                        f"— проверь click_text/match_all"
-                    )
+    return results
 
-                change_text = describe_change(key, prev, curr)
-                if change_text:
-                    changes.append(change_text)
 
-    save_state(state)
+def main() -> int:
+    config = load_config()
+    users = load_users(config)
+    if not users:
+        print("Не настроено ни одного пользователя (добавь users в config.yaml)")
+        return 1
 
-    print(f"Проверено направлений: {len(programs)}")
-    print("Текущий статус по каждому направлению:")
-    for s in status_lines:
-        print(" -", s)
-    print(f"Изменения: {len(changes)}")
-    for c in changes:
-        print(c)
+    token = os.environ.get("TELEGRAM_BOT_TOKEN")
+    triggered_chat_id = os.environ.get("TRIGGERED_CHAT_ID") or None
+    manual_run = os.environ.get("GITHUB_EVENT_NAME") == "workflow_dispatch"
+    force_notify_flag = "--force-notify" in sys.argv
+
+    if triggered_chat_id and not any(str(u["chat_id"]) == str(triggered_chat_id) for u in users):
+        print(f"Неизвестный chat_id {triggered_chat_id} — команду игнорирую.")
+        if token:
+            send_message(token, triggered_chat_id, NOT_REGISTERED_TEXT)
+        return 0
+
+    errors: list[str] = []
+    program_results = fetch_program_results(config, users, errors)
+    programs = config.get("programs", [])
+
+    state = load_state()
+    now = datetime.now(timezone.utc).isoformat()
+
+    print(f"Проверено направлений: {len(programs)} для {len(users)} пользователь(ей)")
     if errors:
         print("Ошибки:")
         for e in errors:
             print(" -", e)
 
-    should_notify = bool(changes) or force_notify
-    if should_notify and token and chat_id:
-        lines = ["📋 Обновление по конкурсным спискам"]
-        if changes:
-            lines.append("")
-            lines.extend(changes)
-        else:
-            lines.append("\nБез изменений с прошлой проверки. Текущий статус:")
-            lines.extend(status_lines)
-        if errors:
-            lines.append("\nОшибки при проверке:")
-            lines.extend(f"- {e}" for e in errors)
-        send_message(token, chat_id, "\n".join(lines))
-    elif should_notify:
-        print("TELEGRAM_BOT_TOKEN/TELEGRAM_CHAT_ID не заданы — уведомление не отправлено")
+    for user in users:
+        user_name = user["name"]
+        user_chat_id = str(user["chat_id"])
+        user_state = state.setdefault(user_name, {})
 
+        status_lines: list[str] = []
+        changes: list[str] = []
+
+        for entry in programs:
+            key = program_key(entry)
+            per_user = program_results.get(key)
+            if per_user is None:
+                continue
+            result = per_user[user_name]
+            mode = entry.get("mode", "context")
+
+            curr = {
+                "found": result.found,
+                "rank": result.rank,
+                "total": result.total,
+                "row": result.row,
+                "url": entry.get("url"),
+                "checked_at": now,
+            }
+            prev = user_state.get(key)
+            user_state[key] = curr
+
+            status_lines.append(status_line(key, mode, entry, result))
+            change_text = describe_change(key, prev, curr)
+            if change_text:
+                changes.append(change_text)
+
+        print(f"\n[{user_name}] изменений: {len(changes)}")
+        for s in status_lines:
+            print(" -", s)
+
+        wants_full_report = (
+            user_chat_id == str(triggered_chat_id)
+            or (manual_run and not triggered_chat_id)
+            or force_notify_flag
+        )
+
+        if not token:
+            continue
+
+        if changes:
+            lines = ["📋 Обновление по конкурсным спискам", ""]
+            lines.extend(changes)
+            if errors:
+                lines.append("\nОшибки при проверке:")
+                lines.extend(f"- {e}" for e in errors)
+            send_message(token, user_chat_id, "\n".join(lines))
+        elif wants_full_report:
+            lines = ["📋 Без изменений с прошлой проверки. Текущий статус:", ""]
+            lines.extend(status_lines)
+            if errors:
+                lines.append("\nОшибки при проверке:")
+                lines.extend(f"- {e}" for e in errors)
+            send_message(token, user_chat_id, "\n".join(lines))
+
+    save_state(state)
     return 0
 
 
