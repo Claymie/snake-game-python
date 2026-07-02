@@ -94,14 +94,14 @@ programs:
 
   # Бюджетные списки НГТУ (fk_tr_basis=1 вместо 2) — добавлены отдельно
   # для Бориса, но, как и везде, проверяются для всех: просто у остальных
-  # там кода нет, и будет "не найден". Квоты для бюджета не давали, поэтому
-  # не указаны — сравнение будет с общим числом заявок, а не с потолком.
+  # там кода нет, и будет "не найден".
   - university: "НГТУ (АВТФ)"
     specialty: "09.03.01 Информатика и вычислительная техника"
     form: "бюджет"
     url: "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.1&fk_tr_basis=1"
     mode: "id_epgu"
     autoscroll: true
+    quota: 15
 
   - university: "НГТУ (АВТФ)"
     specialty: "09.03.02 Информационные системы и технологии"
@@ -109,6 +109,7 @@ programs:
     url: "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.2&fk_tr_basis=1"
     mode: "id_epgu"
     autoscroll: true
+    quota: 4
 
   - university: "НГТУ (АВТФ)"
     specialty: "09.03.03 Прикладная информатика"
@@ -116,6 +117,7 @@ programs:
     url: "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.3&fk_tr_basis=1"
     mode: "id_epgu"
     autoscroll: true
+    quota: 4
 
   - university: "НГТУ (АВТФ)"
     specialty: "09.03.04 Программная инженерия"
@@ -123,6 +125,7 @@ programs:
     url: "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.4&fk_tr_basis=1"
     mode: "id_epgu"
     autoscroll: true
+    quota: 5
 
   - university: "НГТУ (АВТФ)"
     specialty: "10.03.01 Информационная безопасность"
@@ -130,3 +133,4 @@ programs:
     url: "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.5&fk_tr_basis=1"
     mode: "id_epgu"
     autoscroll: true
+    quota: 5
