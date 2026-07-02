@@ -1,0 +1,53 @@
+name: Мгновенный ответ по запросу вебхука
+
+# Не запускается сам по расписанию — только когда его дёргает внешний
+# вебхук (Cloudflare Worker, см. university_tracker/webhook/) сразу после
+# того, как пользователь написал боту. chat_id передаётся параметром,
+# чтобы main.py сразу знал, кому отвечать.
+on:
+  workflow_dispatch:
+    inputs:
+      chat_id:
+        description: "Telegram chat_id, который запросил проверку"
+        required: true
+
+concurrency:
+  group: admission-tracker-git
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  respond:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        working-directory: university_tracker
+        run: |
+          pip install -r requirements.txt
+          python -m playwright install --with-deps chromium
+
+      - name: Проверить конкурсные списки и ответить
+        working-directory: university_tracker
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TRIGGERED_CHAT_ID: ${{ github.event.inputs.chat_id }}
+        run: python main.py
+
+      - name: Сохранить состояние
+        run: |
+          git config user.name "admission-tracker-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add university_tracker/data/state.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Обновить состояние (мгновенный ответ по вебхуку)"
+            git pull --rebase -X ours origin main
+            git push
+          fi

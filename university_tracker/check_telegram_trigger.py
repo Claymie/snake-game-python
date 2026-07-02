@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import os
+import urllib.error
 import urllib.parse
 import urllib.request
 from pathlib import Path
@@ -96,10 +97,21 @@ def main() -> int:
     _ensure_commands_registered(token)
     offset = _load_offset()
 
-    data = _get(
-        f"https://api.telegram.org/bot{token}/getUpdates",
-        {"offset": offset, "timeout": 0},
-    )
+    try:
+        data = _get(
+            f"https://api.telegram.org/bot{token}/getUpdates",
+            {"offset": offset, "timeout": 0},
+        )
+    except urllib.error.HTTPError as exc:
+        if exc.code == 409:
+            # 409 = у бота включён вебхук (instant_respond.yml), Telegram не
+            # отдаёт апдейты через getUpdates одновременно с ним — это не
+            # ошибка, а ожидаемое состояние, когда мгновенный вебхук уже
+            # работает и этот запасной опрос просто больше не нужен.
+            print("false")
+            print("")
+            return 0
+        raise
     updates = data.get("result", [])
 
     triggered, new_offset, chat_id = evaluate_updates(updates, offset)
