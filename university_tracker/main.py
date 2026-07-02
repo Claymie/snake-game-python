@@ -83,18 +83,21 @@ def _place_text(rank: int | None, total: int | None, quota: int | None) -> str:
     return f"место {rank}/{total}"
 
 
-def status_line(key: str, mode: str, entry: dict, result: LookupResult) -> str:
+def status_line(label: str, mode: str, entry: dict, result: LookupResult) -> str:
     if result.found:
-        return f"✅ {key}: {_place_text(result.rank, result.total, result.quota)}"
+        return f"✅ {label}: {_place_text(result.rank, result.total, result.quota)}"
     if result.matched_context:
         quota_text = f", мест: {result.quota}" if result.quota is not None else ""
-        return f"➖ {key}: список найден ({result.total} чел.{quota_text}), кода в нём нет"
+        return f"➖ {label}: список найден ({result.total} чел.{quota_text}), кода в нём нет"
     if mode == "id_epgu":
-        return f"❔ {key}: не нашли на странице ни одной записи 'ID профиля ЕПГУ'"
+        return f"❔ {label}: не нашли на странице ни одной записи 'ID профиля ЕПГУ'"
     return (
-        f"❔ {key}: не нашли таблицу по match_all={entry.get('match_all')} "
+        f"❔ {label}: не нашли таблицу по match_all={entry.get('match_all')} "
         f"— проверь click_text/match_all"
     )
+
+
+GROUP_SEPARATOR = "~~~~~~~~~~"
 
 
 def describe_change(key: str, prev: dict | None, curr: dict) -> str | None:
@@ -205,6 +208,7 @@ def main() -> int:
 
         status_lines: list[str] = []
         changes: list[str] = []
+        last_group: tuple[str, str] | None = None
 
         for entry in programs:
             key = program_key(entry)
@@ -231,7 +235,17 @@ def main() -> int:
             prev = user_state.get(key)
             user_state[key] = curr
 
-            status_lines.append(status_line(key, mode, entry, result))
+            # Группируем по вузу+форме обучения (платное/бюджет) отдельной
+            # шапкой и разделителем — иначе при 10+ направлениях список
+            # сливается в одну нечитаемую кучу.
+            group = (entry["university"], entry.get("form", "?"))
+            if group != last_group:
+                if last_group is not None:
+                    status_lines.append(GROUP_SEPARATOR)
+                status_lines.append(f"🏫 {group[0]} — {group[1]}")
+                last_group = group
+
+            status_lines.append(status_line(entry["specialty"], mode, entry, result))
             change_text = describe_change(key, prev, curr)
             if change_text:
                 changes.append(change_text)
