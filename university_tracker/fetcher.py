@@ -67,13 +67,29 @@ class PageFetcher:
                     except Exception:
                         pass
                 except Exception as exc:
-                    click_error = f"не удалось кликнуть '{text}': {exc}"
+                    snippet = self._body_text_snippet(page)
+                    click_error = (
+                        f"не удалось кликнуть '{text}': {exc}\n"
+                        f"    Текст на странице на момент сбоя (первые 400 символов): {snippet!r}"
+                    )
                     break
             if autoscroll:
                 self._autoscroll(page)
             return page.content(), click_error
         finally:
             page.close()
+
+    @staticmethod
+    def _body_text_snippet(page, length: int = 400) -> str:
+        """Короткий кусок видимого текста страницы для диагностики: если
+        клик не удался, это показывает, что реально отрендерилось (баннер
+        cookie, экран загрузки, капча, другая формулировка и т.д.), а не
+        просто "не нашли текст"."""
+        try:
+            text = page.inner_text("body")
+            return " ".join(text.split())[:length]
+        except Exception:
+            return "<не удалось прочитать текст страницы>"
 
     @staticmethod
     def _autoscroll(page, max_rounds: int = 25, pause_ms: int = 400) -> None:
