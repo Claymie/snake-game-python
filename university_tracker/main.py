@@ -125,21 +125,21 @@ def fetch_program_results(config: dict, users: list[dict], errors: list[str]) ->
 
     programs = config.get("programs", [])
 
-    groups: dict[tuple[str, str | None], list[dict]] = defaultdict(list)
+    groups: dict[tuple[str, tuple[str, ...]], list[dict]] = defaultdict(list)
     for entry in programs:
         url = entry.get("url")
         if not url:
             errors.append(f"{program_key(entry)}: не указан url в config.yaml")
             continue
-        groups[(url, entry.get("click_text"))].append(entry)
+        groups[(url, tuple(entry.get("click_sequence") or []))].append(entry)
 
     results: dict[str, dict[str, LookupResult]] = {}
 
     with PageFetcher() as fetcher:
-        for (url, click_text), entries in groups.items():
+        for (url, click_sequence), entries in groups.items():
             autoscroll = any(entry.get("autoscroll") for entry in entries)
             try:
-                html = fetcher.get_html(url, click_text=click_text, autoscroll=autoscroll)
+                html = fetcher.get_html(url, click_sequence=list(click_sequence), autoscroll=autoscroll)
             except Exception as exc:  # noqa: BLE001 - хотим залогировать любую ошибку сети
                 for entry in entries:
                     errors.append(f"{program_key(entry)}: ошибка загрузки страницы — {exc}")
