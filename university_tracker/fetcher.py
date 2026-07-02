@@ -40,7 +40,7 @@ class PageFetcher:
         click_sequence: list[str] | None = None,
         autoscroll: bool = False,
         timeout_ms: int = 45000,
-    ) -> str:
+    ) -> tuple[str, str | None]:
         """click_sequence — список текстов, по которым нужно кликнуть по
         очереди перед чтением страницы (например: открыть выпадающий
         список -> выбрать значение -> открыть следующий список -> выбрать
@@ -48,9 +48,14 @@ class PageFetcher:
         текст которого СОДЕРЖИТ нужную строку (без учёта регистра), и после
         клика немного ждёт (анимация выпадашки, возможный сетевой запрос).
         Если какой-то шаг не удался — последовательность прерывается, но
-        уже загруженная страница всё равно возвращается, а не роняет прогон."""
+        уже загруженная страница всё равно возвращается, а не роняет прогон.
+
+        Возвращает (html, click_error) — click_error не None, если один из
+        шагов click_sequence не удался (с текстом, на котором споткнулись),
+        чтобы это можно было залогировать и понять, что поправить."""
         assert self._browser is not None
         page = self._browser.new_page(user_agent=USER_AGENT, locale="ru-RU")
+        click_error: str | None = None
         try:
             page.goto(url, wait_until="networkidle", timeout=timeout_ms)
             for text in click_sequence or []:
@@ -61,11 +66,12 @@ class PageFetcher:
                         page.wait_for_load_state("networkidle", timeout=5000)
                     except Exception:
                         pass
-                except Exception:
+                except Exception as exc:
+                    click_error = f"не удалось кликнуть '{text}': {exc}"
                     break
             if autoscroll:
                 self._autoscroll(page)
-            return page.content()
+            return page.content(), click_error
         finally:
             page.close()
 

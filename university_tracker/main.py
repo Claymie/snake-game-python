@@ -139,11 +139,17 @@ def fetch_program_results(config: dict, users: list[dict], errors: list[str]) ->
         for (url, click_sequence), entries in groups.items():
             autoscroll = any(entry.get("autoscroll") for entry in entries)
             try:
-                html = fetcher.get_html(url, click_sequence=list(click_sequence), autoscroll=autoscroll)
+                html, click_error = fetcher.get_html(
+                    url, click_sequence=list(click_sequence), autoscroll=autoscroll
+                )
             except Exception as exc:  # noqa: BLE001 - хотим залогировать любую ошибку сети
                 for entry in entries:
                     errors.append(f"{program_key(entry)}: ошибка загрузки страницы — {exc}")
                 continue
+
+            if click_error:
+                for entry in entries:
+                    errors.append(f"{program_key(entry)}: {click_error}")
 
             for entry in entries:
                 key = program_key(entry)
