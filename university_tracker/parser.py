@@ -69,36 +69,28 @@ def _looks_like_header(cells: list[str]) -> bool:
     )
 
 
-def _first_column_is_rank_number(header_cells: list[str]) -> bool:
-    if not header_cells or not header_cells[0]:
-        return False
-    first = header_cells[0].lower()
-    return any(marker in first for marker in ("№", "ном", "место", "п/п"))
-
-
 def _scan_table(table, code: str) -> LookupResult | None:
     rows = _rows_from_table(table)
     if not rows:
         return None
 
-    header_cells = None
     data_rows = rows
     if _looks_like_header(rows[0]):
-        header_cells = rows[0]
         data_rows = rows[1:]
     if not data_rows:
         return None
 
-    has_rank_column = _first_column_is_rank_number(header_cells or [])
-
     for idx, cells in enumerate(data_rows, start=1):
         if any(code in cell for cell in cells):
             rank = idx
-            # Используем число из первой колонки только если по заголовку видно,
-            # что это явно колонка номера/места, а не сам код абитуриента
-            # (иначе код вида "1339447" примут за место 1339447).
-            if has_rank_column and cells[0].strip().isdigit():
-                rank = int(cells[0].strip())
+            first_cell = cells[0].strip() if cells else ""
+            # Если первая колонка — число и это не сам код абитуриента, значит
+            # это явная колонка места/номера в списке — берём её, а не наш
+            # порядковый индекс по строкам (заголовок мог не распознаться,
+            # и тогда индекс съезжает на 1). Если же первая колонка это и
+            # есть код (колонки места вообще нет), используем индекс.
+            if first_cell.isdigit() and first_cell != code:
+                rank = int(first_cell)
             return LookupResult(found=True, rank=rank, total=len(data_rows), row=cells)
 
     return LookupResult(found=False, total=len(data_rows))

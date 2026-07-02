@@ -185,6 +185,26 @@ def test_id_epgu_quota_missing_is_none():
     assert result.quota is None
 
 
+# Реальный баг с НГУ: заголовок таблицы не распознался нашим детектором
+# (слова в нём не содержат ни одного из header_markers), поэтому строка
+# заголовка попадала в data_rows, и место по порядковому индексу съезжало
+# на 1 относительно места, которое сайт САМ пишет в первой ячейке строки.
+EXPLICIT_RANK_HEADER_NOT_RECOGNIZED_HTML = """
+<html><body>
+<table>
+  <tr><td>Заголовок непонятный</td><td>Applicant</td></tr>
+  <tr><td>103</td><td>1339447</td></tr>
+</table>
+</body></html>
+"""
+
+
+def test_uses_explicit_rank_even_when_header_not_recognized():
+    result = find_applicant(EXPLICIT_RANK_HEADER_NOT_RECOGNIZED_HTML, "1339447")
+    assert result.found
+    assert result.rank == 103
+
+
 if __name__ == "__main__":
     test_finds_rank_from_leading_numeric_column()
     test_finds_rank_by_row_position_when_no_numeric_column()
@@ -197,4 +217,5 @@ if __name__ == "__main__":
     test_id_epgu_no_list_on_page()
     test_id_epgu_extracts_quota()
     test_id_epgu_quota_missing_is_none()
+    test_uses_explicit_rank_even_when_header_not_recognized()
     print("OK: все тесты парсера прошли")
