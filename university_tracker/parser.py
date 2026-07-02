@@ -33,6 +33,12 @@ ID_EPGU_PATTERN = re.compile(r"ID\s*профиля\s*ЕПГУ\s*:?\s*([0-9]+)", 
 # сравнивать место абитуриента, чтобы понять, проходит он или нет.
 QUOTA_PATTERN = re.compile(r"всего\s*мест\D{0,10}?([0-9]+)", re.IGNORECASE)
 
+# "Отдельная квота" — это отдельный, самостоятельный конкурс внутри той же
+# страницы (для льготных категорий поступающих), со своей нумерацией с 1,
+# а не продолжением общего списка. Сайт при этом рисует общую сквозную
+# нумерацию карточек — считать место нужно заново с этого заголовка.
+SEPARATE_QUOTA_PATTERN = re.compile(r"отдельная\s+квота", re.IGNORECASE)
+
 
 @dataclass
 class LookupResult:
@@ -140,23 +146,43 @@ def find_applicant_by_id_epgu(html: str, code: str) -> LookupResult:
     """Парсер под конкурсные списки НГТУ: каждая запись — карточка с текстом
     вида "ID профиля ЕПГУ: 1339447", без <table>. Порядок карточек в
     документе = место в конкурсном списке (список уже отсортирован по
-    баллам сайтом)."""
+    баллам сайтом).
+
+    Если на странице встречается заголовок "Отдельная квота", это отдельный
+    конкурс — нумерация карточек после него должна начинаться заново с 1,
+    а не продолжать сквозную нумерацию с основного списка."""
 
     soup = BeautifulSoup(html, "html.parser")
     text = soup.get_text("\n")
-    matches = ID_EPGU_PATTERN.findall(text)
 
     quota_match = QUOTA_PATTERN.search(text)
     quota = int(quota_match.group(1)) if quota_match else None
 
-    if not matches:
+    events = [(m.start(), "id", m.group(1)) for m in ID_EPGU_PATTERN.finditer(text)]
+    events += [(m.start(), "section", None) for m in SEPARATE_QUOTA_PATTERN.finditer(text)]
+    events.sort(key=lambda e: e[0])
+
+    sections: list[list[str]] = [[]]
+    for _, kind, applicant_code in events:
+        if kind == "section":
+            sections.append([])
+        else:
+            sections[-1].append(applicant_code)
+
+    total = sum(len(section) for section in sections)
+    if not total:
         return LookupResult(found=False, quota=quota)
 
-    total = len(matches)
-    for idx, applicant_code in enumerate(matches, start=1):
-        if applicant_code == code:
-            return LookupResult(
-                found=True, rank=idx, total=total, row=[applicant_code], matched_context=True, quota=quota
-            )
+    for section in sections:
+        for idx, applicant_code in enumerate(section, start=1):
+            if applicant_code == code:
+                return LookupResult(
+                    found=True,
+                    rank=idx,
+                    total=len(section),
+                    row=[applicant_code],
+                    matched_context=True,
+                    quota=quota,
+                )
 
     return LookupResult(found=False, total=total, matched_context=True, quota=quota)

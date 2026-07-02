@@ -205,6 +205,36 @@ def test_uses_explicit_rank_even_when_header_not_recognized():
     assert result.rank == 103
 
 
+# Реальный случай на nstu.ru: после общего списка идёт раздел "Отдельная
+# квота" — это отдельный конкурс для льготников, сайт продолжает сквозную
+# нумерацию карточек (3, 4, 5...), но фактическое место в ЭТОМ конкурсе
+# должно считаться заново с 1.
+NSTU_CARD_HTML_WITH_SEPARATE_QUOTA = """
+<html><body>
+<div class="card"><div>ID профиля ЕПГУ: 1111111</div></div>
+<div class="card"><div>ID профиля ЕПГУ: 2222222</div></div>
+<h2>Отдельная квота</h2>
+<div class="card"><div>ID профиля ЕПГУ: 1423596</div></div>
+<div class="card"><div>ID профиля ЕПГУ: 1339447</div></div>
+<div class="card"><div>ID профиля ЕПГУ: 1219505</div></div>
+</body></html>
+"""
+
+
+def test_id_epgu_restarts_rank_from_one_after_separate_quota_heading():
+    result = find_applicant_by_id_epgu(NSTU_CARD_HTML_WITH_SEPARATE_QUOTA, "1339447")
+    assert result.found
+    assert result.rank == 2
+    assert result.total == 3
+
+
+def test_id_epgu_general_section_unaffected_by_later_separate_quota():
+    result = find_applicant_by_id_epgu(NSTU_CARD_HTML_WITH_SEPARATE_QUOTA, "2222222")
+    assert result.found
+    assert result.rank == 2
+    assert result.total == 2
+
+
 if __name__ == "__main__":
     test_finds_rank_from_leading_numeric_column()
     test_finds_rank_by_row_position_when_no_numeric_column()
@@ -218,4 +248,6 @@ if __name__ == "__main__":
     test_id_epgu_extracts_quota()
     test_id_epgu_quota_missing_is_none()
     test_uses_explicit_rank_even_when_header_not_recognized()
+    test_id_epgu_restarts_rank_from_one_after_separate_quota_heading()
+    test_id_epgu_general_section_unaffected_by_later_separate_quota()
     print("OK: все тесты парсера прошли")
