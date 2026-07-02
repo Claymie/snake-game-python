@@ -76,15 +76,18 @@ programs:
     form: "платное"
     url: "https://abiturient.nsu.ru/bachelor?faculty=11&direction=154&condition=30&type=0"
     autoscroll: true
+    quota: 140
 
   - university: "НГУ"
     specialty: "09.03.01 Информатика и вычислительная техника (Компьютерные науки и системотехника)"
     form: "платное"
     url: "https://abiturient.nsu.ru/bachelor?faculty=8&direction=7&condition=30&type=0"
     autoscroll: true
+    quota: 35
 
   - university: "НГУ"
     specialty: "09.03.01 Информатика и вычислительная техника (Программная инженерия и компьютерные науки)"
     form: "платное"
     url: "https://abiturient.nsu.ru/bachelor?faculty=8&direction=6&condition=30&type=0"
     autoscroll: true
+    quota: 65
