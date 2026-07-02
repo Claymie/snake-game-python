@@ -250,16 +250,23 @@ def main() -> int:
         if not token:
             continue
 
-        if changes:
-            lines = ["📋 Обновление по конкурсным спискам", ""]
-            lines.extend(changes)
+        # Явный запрос (кнопка/команда, ручной прогон, --force-notify) всегда
+        # получает полную картину по всем направлениям, а не только диф —
+        # иначе при случайном изменении лишь одного направления остальные
+        # молча пропадают из ответа, хотя пользователь явно спросил статус.
+        if wants_full_report:
+            lines = ["📋 Текущий статус по всем направлениям:", ""]
+            lines.extend(status_lines)
+            if changes:
+                lines.append("\nИзменения с прошлой проверки:")
+                lines.extend(changes)
             if errors:
                 lines.append("\nОшибки при проверке:")
                 lines.extend(f"- {e}" for e in errors)
             send_message(token, user_chat_id, "\n".join(lines))
-        elif wants_full_report:
-            lines = ["📋 Без изменений с прошлой проверки. Текущий статус:", ""]
-            lines.extend(status_lines)
+        elif changes:
+            lines = ["📋 Обновление по конкурсным спискам", ""]
+            lines.extend(changes)
             if errors:
                 lines.append("\nОшибки при проверке:")
                 lines.extend(f"- {e}" for e in errors)
