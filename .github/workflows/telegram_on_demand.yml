@@ -5,6 +5,15 @@ on:
     - cron: "*/5 * * * *"
   workflow_dispatch: {}
 
+# Общая с track_admission.yml группа — оба workflow пишут в
+# university_tracker/data/state.json, и параллельный запуск приводит к
+# конфликту при git push (один прогон падает, оба шлют дублирующиеся
+# уведомления по устаревшим данным). cancel-in-progress: false — новый
+# запуск просто ждёт своей очереди.
+concurrency:
+  group: admission-tracker-git
+  cancel-in-progress: false
+
 permissions:
   contents: write
 
@@ -34,7 +43,7 @@ jobs:
           git add university_tracker/data/telegram_offset.json
           if ! git diff --cached --quiet; then
             git commit -m "Обновить offset Telegram"
-            git pull --rebase origin main
+            git pull --rebase -X ours origin main
             git push
           fi
 
@@ -69,6 +78,6 @@ jobs:
           git add university_tracker/data/state.json
           if ! git diff --cached --quiet; then
             git commit -m "Обновить состояние (по запросу из Telegram)"
-            git pull --rebase origin main
+            git pull --rebase -X ours origin main
             git push
           fi

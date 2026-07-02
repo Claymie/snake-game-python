@@ -5,6 +5,15 @@ on:
     - cron: "0 */2 * * *"
   workflow_dispatch: {}
 
+# Общая с telegram_on_demand.yml группа: оба workflow пишут в
+# university_tracker/data/state.json, и если запустятся одновременно —
+# ловят конфликт при git push и второй прогон падает с ошибкой, а оба
+# шлют одинаковые (устаревшие) уведомления. cancel-in-progress: false —
+# новый запуск просто ждёт своей очереди, а не отменяет текущий.
+concurrency:
+  group: admission-tracker-git
+  cancel-in-progress: false
+
 permissions:
   contents: write
 
@@ -38,6 +47,6 @@ jobs:
           git add university_tracker/data/state.json
           if ! git diff --cached --quiet; then
             git commit -m "Обновить состояние конкурсных списков"
-            git pull --rebase origin main
+            git pull --rebase -X ours origin main
             git push
           fi
