@@ -177,7 +177,6 @@ def main() -> int:
 
     token = os.environ.get("TELEGRAM_BOT_TOKEN")
     triggered_chat_id = os.environ.get("TRIGGERED_CHAT_ID") or None
-    manual_run = os.environ.get("GITHUB_EVENT_NAME") == "workflow_dispatch"
     force_notify_flag = "--force-notify" in sys.argv
 
     if triggered_chat_id and not any(str(u["chat_id"]) == str(triggered_chat_id) for u in users):
@@ -241,11 +240,15 @@ def main() -> int:
         for s in status_lines:
             print(" -", s)
 
-        wants_full_report = (
-            user_chat_id == str(triggered_chat_id)
-            or (manual_run and not triggered_chat_id)
-            or force_notify_flag
-        )
+        # Полный статус шлём всегда, кроме одного случая: кто-то другой
+        # явно спросил проверку (кнопка/команда в Telegram) — тогда именно
+        # ему отвечаем полным списком, а остальных не дёргаем понапрасну
+        # (они получат уведомление только если у них реально что-то
+        # изменилось). Во всех остальных случаях — плановый прогон раз в
+        # ~2 часа, ручной запуск, --force-notify — это не "чей-то личный"
+        # запрос, поэтому просто у всех полная картина.
+        someone_elses_request = bool(triggered_chat_id) and user_chat_id != str(triggered_chat_id)
+        wants_full_report = force_notify_flag or not someone_elses_request
 
         if not token:
             continue

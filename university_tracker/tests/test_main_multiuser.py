@@ -1,7 +1,8 @@
-"""Проверка мультипользовательской логики main.py: каждый пользователь
-должен получать уведомления только о своих изменениях, а полный статус —
-только тот, кто явно запросил проверку (или ручной запуск/--force-notify).
-Сеть и Playwright подменяются, реально ничего не открывается.
+"""Проверка мультипользовательской логики main.py: без явного персонального
+запроса (плановый прогон, ручной запуск, --force-notify) полный статус
+получают все пользователи; а если кто-то один явно спросил через Telegram
+(TRIGGERED_CHAT_ID) — только ему, остальные молчат, если у них ничего не
+изменилось. Сеть и Playwright подменяются, реально ничего не открывается.
 """
 
 import json
@@ -70,7 +71,10 @@ def _run(config, initial_state, fake_results, env, monkeypatch_send):
         return sent, json.loads(state_path.read_text(encoding="utf-8"))
 
 
-def test_only_user_with_change_gets_notified():
+def test_background_run_sends_full_status_to_everyone():
+    """Плановый прогон (нет TRIGGERED_CHAT_ID — это не чей-то персональный
+    запрос) шлёт полный статус всем зарегистрированным, а не только тем,
+    у кого что-то изменилось с прошлого раза."""
     key = main.program_key(CONFIG["programs"][0])
     fake_results = {key: {"A": LookupResult(found=True, rank=5, total=10), "B": LookupResult(found=False)}}
     sent, _ = _run(
@@ -80,8 +84,8 @@ def test_only_user_with_change_gets_notified():
         env={"TELEGRAM_BOT_TOKEN": "tok", "TRIGGERED_CHAT_ID": None, "GITHUB_EVENT_NAME": None},
         monkeypatch_send=None,
     )
-    chat_ids_notified = [c for c, _ in sent]
-    assert chat_ids_notified == ["1001"], sent
+    chat_ids_notified = sorted(c for c, _ in sent)
+    assert chat_ids_notified == ["1001", "2002"], sent
 
 
 def test_triggered_user_gets_full_report_even_without_change():
@@ -112,7 +116,7 @@ def test_unknown_chat_id_gets_not_registered_reply_and_skips_check():
 
 
 if __name__ == "__main__":
-    test_only_user_with_change_gets_notified()
+    test_background_run_sends_full_status_to_everyone()
     test_triggered_user_gets_full_report_even_without_change()
     test_unknown_chat_id_gets_not_registered_reply_and_skips_check()
     print("OK: все тесты мультипользовательской логики прошли")
