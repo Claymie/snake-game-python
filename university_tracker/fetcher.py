@@ -37,22 +37,32 @@ class PageFetcher:
     def get_html(
         self,
         url: str,
-        click_text: str | None = None,
+        click_sequence: list[str] | None = None,
         autoscroll: bool = False,
         timeout_ms: int = 45000,
     ) -> str:
+        """click_sequence — список текстов, по которым нужно кликнуть по
+        очереди перед чтением страницы (например: открыть выпадающий
+        список -> выбрать значение -> открыть следующий список -> выбрать
+        -> нажать кнопку отправки формы). Каждый клик ищет первый элемент,
+        текст которого СОДЕРЖИТ нужную строку (без учёта регистра), и после
+        клика немного ждёт (анимация выпадашки, возможный сетевой запрос).
+        Если какой-то шаг не удался — последовательность прерывается, но
+        уже загруженная страница всё равно возвращается, а не роняет прогон."""
         assert self._browser is not None
         page = self._browser.new_page(user_agent=USER_AGENT, locale="ru-RU")
         try:
             page.goto(url, wait_until="networkidle", timeout=timeout_ms)
-            if click_text:
+            for text in click_sequence or []:
                 try:
-                    page.get_by_text(click_text, exact=False).first.click(timeout=10000)
-                    page.wait_for_load_state("networkidle", timeout=timeout_ms)
+                    page.get_by_text(text, exact=False).first.click(timeout=10000)
+                    page.wait_for_timeout(500)
+                    try:
+                        page.wait_for_load_state("networkidle", timeout=5000)
+                    except Exception:
+                        pass
                 except Exception:
-                    # Не смогли найти/кликнуть вкладку — работаем с тем, что уже
-                    # загружено, а не роняем весь прогон.
-                    pass
+                    break
             if autoscroll:
                 self._autoscroll(page)
             return page.content()
