@@ -3,35 +3,35 @@
     "НГТУ (АВТФ) — 09.03.01 Информатика и вычислительная техника (платное)": {
       "found": true,
       "rank": 663,
-      "total": 981,
+      "total": 982,
       "quota": 80,
       "row": [
         "1339447"
       ],
       "url": "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.1&fk_tr_basis=2",
-      "checked_at": "2026-08-12T07:16:23.351325+00:00"
+      "checked_at": "2026-08-12T09:07:28.367948+00:00"
     },
     "НГТУ (АВТФ) — 09.03.02 Информационные системы и технологии (платное)": {
       "found": true,
-      "rank": 429,
+      "rank": 428,
       "total": 675,
       "quota": 25,
       "row": [
         "1339447"
       ],
       "url": "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.2&fk_tr_basis=2",
-      "checked_at": "2026-08-12T07:16:23.351325+00:00"
+      "checked_at": "2026-08-12T09:07:28.367948+00:00"
     },
     "НГТУ (АВТФ) — 09.03.03 Прикладная информатика (платное)": {
       "found": true,
-      "rank": 387,
-      "total": 559,
+      "rank": 389,
+      "total": 562,
       "quota": 25,
       "row": [
         "1339447"
       ],
       "url": "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.3&fk_tr_basis=2",
-      "checked_at": "2026-08-12T07:16:23.351325+00:00"
+      "checked_at": "2026-08-12T09:07:28.367948+00:00"
     },
     "НГТУ (АВТФ) — 09.03.04 Программная инженерия (платное)": {
       "found": true,
@@ -42,18 +42,18 @@
         "1339447"
       ],
       "url": "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.4&fk_tr_basis=2",
-      "checked_at": "2026-08-12T07:16:23.351325+00:00"
+      "checked_at": "2026-08-12T09:07:28.367948+00:00"
     },
     "НГТУ (АВТФ) — 10.03.01 Информационная безопасность (платное)": {
       "found": true,
-      "rank": 549,
-      "total": 836,
+      "rank": 548,
+      "total": 835,
       "quota": 55,
       "row": [
         "1339447"
       ],
       "url": "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.5&fk_tr_basis=2",
-      "checked_at": "2026-08-12T07:16:23.351325+00:00"
+      "checked_at": "2026-08-12T09:07:28.367948+00:00"
     },
     "НГУ — 09.03.03 Прикладная информатика (Прикладной искусственный интеллект) (платное)": {
       "found": false,
@@ -62,7 +62,7 @@
       "quota": 140,
       "row": [],
       "url": "https://abiturient.nsu.ru/bachelor?faculty=11&direction=154&condition=30&type=0",
-      "checked_at": "2026-08-12T07:16:23.351325+00:00"
+      "checked_at": "2026-08-12T09:07:28.367948+00:00"
     },
     "НГУ — 09.03.01 Информатика и вычислительная техника (Компьютерные науки и системотехника) (платное)": {
       "found": false,
@@ -71,7 +71,7 @@
       "quota": 35,
       "row": [],
       "url": "https://abiturient.nsu.ru/bachelor?faculty=8&direction=7&condition=30&type=0",
-      "checked_at": "2026-08-12T07:16:23.351325+00:00"
+      "checked_at": "2026-08-12T09:07:28.367948+00:00"
     },
     "НГУ — 09.03.01 Информатика и вычислительная техника (Программная инженерия и компьютерные науки) (платное)": {
       "found": false,
@@ -80,25 +80,25 @@
       "quota": 65,
       "row": [],
       "url": "https://abiturient.nsu.ru/bachelor?faculty=8&direction=6&condition=30&type=0",
-      "checked_at": "2026-08-12T07:16:23.351325+00:00"
+      "checked_at": "2026-08-12T09:07:28.367948+00:00"
     },
     "НГТУ (АВТФ) — 09.03.01 Информатика и вычислительная техника (бюджет)": {
       "found": false,
       "rank": null,
-      "total": 148,
+      "total": 145,
       "quota": 15,
       "row": [],
       "url": "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.1&fk_tr_basis=1",
-      "checked_at": "2026-08-12T07:16:23.351325+00:00"
+      "checked_at": "2026-08-12T09:07:28.367948+00:00"
     },
     "НГТУ (АВТФ) — 09.03.02 Информационные системы и технологии (бюджет)": {
       "found": false,
       "rank": null,
-      "total": 33,
+      "total": 32,
       "quota": 4,
       "row": [],
       "url": "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.2&fk_tr_basis=1",
-      "checked_at": "2026-08-12T07:16:23.351325+00:00"
+      "checked_at": "2026-08-12T09:07:28.367948+00:00"
     },
     "НГТУ (АВТФ) — 09.03.03 Прикладная информатика (бюджет)": {
       "found": false,
@@ -107,36 +107,36 @@
       "quota": 4,
       "row": [],
       "url": "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.3&fk_tr_basis=1",
-      "checked_at": "2026-08-12T07:16:23.351325+00:00"
+      "checked_at": "2026-08-12T09:07:28.367948+00:00"
     },
     "НГТУ (АВТФ) — 09.03.04 Программная инженерия (бюджет)": {
       "found": false,
       "rank": null,
-      "total": 44,
+      "total": 41,
       "quota": 5,
       "row": [],
       "url": "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.4&fk_tr_basis=1",
-      "checked_at": "2026-08-12T07:16:23.351325+00:00"
+      "checked_at": "2026-08-12T09:07:28.367948+00:00"
     },
     "НГТУ (АВТФ) — 10.03.01 Информационная безопасность (бюджет)": {
       "found": false,
       "rank": null,
-      "total": 46,
+      "total": 45,
       "quota": 5,
       "row": [],
       "url": "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.5&fk_tr_basis=1",
-      "checked_at": "2026-08-12T07:16:23.351325+00:00"
+      "checked_at": "2026-08-12T09:07:28.367948+00:00"
     }
   },
   "Борис": {
     "НГТУ (АВТФ) — 09.03.01 Информатика и вычислительная техника (платное)": {
       "found": false,
       "rank": null,
-      "total": 981,
+      "total": 982,
       "quota": 80,
       "row": [],
       "url": "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.1&fk_tr_basis=2",
-      "checked_at": "2026-08-12T07:16:23.351325+00:00"
+      "checked_at": "2026-08-12T09:07:28.367948+00:00"
     },
     "НГТУ (АВТФ) — 09.03.02 Информационные системы и технологии (платное)": {
       "found": false,
@@ -145,16 +145,16 @@
       "quota": 25,
       "row": [],
       "url": "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.2&fk_tr_basis=2",
-      "checked_at": "2026-08-12T07:16:23.351325+00:00"
+      "checked_at": "2026-08-12T09:07:28.367948+00:00"
     },
     "НГТУ (АВТФ) — 09.03.03 Прикладная информатика (платное)": {
       "found": false,
       "rank": null,
-      "total": 559,
+      "total": 562,
       "quota": 25,
       "row": [],
       "url": "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.3&fk_tr_basis=2",
-      "checked_at": "2026-08-12T07:16:23.351325+00:00"
+      "checked_at": "2026-08-12T09:07:28.367948+00:00"
     },
     "НГТУ (АВТФ) — 09.03.04 Программная инженерия (платное)": {
       "found": false,
@@ -163,16 +163,16 @@
       "quota": 75,
       "row": [],
       "url": "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.4&fk_tr_basis=2",
-      "checked_at": "2026-08-12T07:16:23.351325+00:00"
+      "checked_at": "2026-08-12T09:07:28.367948+00:00"
     },
     "НГТУ (АВТФ) — 10.03.01 Информационная безопасность (платное)": {
       "found": false,
       "rank": null,
-      "total": 836,
+      "total": 835,
       "quota": 55,
       "row": [],
       "url": "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.5&fk_tr_basis=2",
-      "checked_at": "2026-08-12T07:16:23.351325+00:00"
+      "checked_at": "2026-08-12T09:07:28.367948+00:00"
     },
     "НГУ — 09.03.03 Прикладная информатика (Прикладной искусственный интеллект) (платное)": {
       "found": true,
@@ -191,7 +191,7 @@
         "ПоданоМатематика / Программные решения64Информатика и ИКТ / Физика / Цифровые платформы62Русский язык60Сумма баллов за инд.дост.0×1351291#574ПоданоСумма баллов:186Номер приоритета:3Основной высший приоритет:НетМатематика / Программные решения:64Информатика и ИКТ / Физика / Цифровые платформы:62Русский язык:60Сумма баллов за инд.дост.:0Рекомендации к зачислению:"
       ],
       "url": "https://abiturient.nsu.ru/bachelor?faculty=11&direction=154&condition=30&type=0",
-      "checked_at": "2026-08-12T07:16:23.351325+00:00"
+      "checked_at": "2026-08-12T09:07:28.367948+00:00"
     },
     "НГУ — 09.03.01 Информатика и вычислительная техника (Компьютерные науки и системотехника) (платное)": {
       "found": true,
@@ -210,7 +210,7 @@
         "ПоданоВысшая математика / Математика64Компьютерные науки / Физические основы информатики / Информатика и ИКТ / Физика62Русский язык60Сумма баллов за инд.дост.0×1351291#453ПоданоСумма баллов:186Номер приоритета:2Основной высший приоритет:НетВысшая математика / Математика:64Компьютерные науки / Физические основы информатики / Информатика и ИКТ / Физика:62Русский язык:60Сумма баллов за инд.дост.:0Рекомендации к зачислению:"
       ],
       "url": "https://abiturient.nsu.ru/bachelor?faculty=8&direction=7&condition=30&type=0",
-      "checked_at": "2026-08-12T07:16:23.351325+00:00"
+      "checked_at": "2026-08-12T09:07:28.367948+00:00"
     },
     "НГУ — 09.03.01 Информатика и вычислительная техника (Программная инженерия и компьютерные науки) (платное)": {
       "found": true,
@@ -229,27 +229,27 @@
         "ПоданоВысшая математика / Математика64Компьютерные науки / Физические основы информатики / Информатика и ИКТ / Физика62Русский язык60Сумма баллов за инд.дост.0×1351291#501ПоданоСумма баллов:186Номер приоритета:1Основной высший приоритет:НетВысшая математика / Математика:64Компьютерные науки / Физические основы информатики / Информатика и ИКТ / Физика:62Русский язык:60Сумма баллов за инд.дост.:0Рекомендации к зачислению:"
       ],
       "url": "https://abiturient.nsu.ru/bachelor?faculty=8&direction=6&condition=30&type=0",
-      "checked_at": "2026-08-12T07:16:23.351325+00:00"
+      "checked_at": "2026-08-12T09:07:28.367948+00:00"
     },
     "НГТУ (АВТФ) — 09.03.01 Информатика и вычислительная техника (бюджет)": {
       "found": true,
       "rank": 11,
-      "total": 143,
+      "total": 140,
       "quota": 15,
       "row": [
         "1351291"
       ],
       "url": "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.1&fk_tr_basis=1",
-      "checked_at": "2026-08-12T07:16:23.351325+00:00"
+      "checked_at": "2026-08-12T09:07:28.367948+00:00"
     },
     "НГТУ (АВТФ) — 09.03.02 Информационные системы и технологии (бюджет)": {
       "found": false,
       "rank": null,
-      "total": 33,
+      "total": 32,
       "quota": 4,
       "row": [],
       "url": "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.2&fk_tr_basis=1",
-      "checked_at": "2026-08-12T07:16:23.351325+00:00"
+      "checked_at": "2026-08-12T09:07:28.367948+00:00"
     },
     "НГТУ (АВТФ) — 09.03.03 Прикладная информатика (бюджет)": {
       "found": false,
@@ -258,25 +258,25 @@
       "quota": 4,
       "row": [],
       "url": "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.3&fk_tr_basis=1",
-      "checked_at": "2026-08-12T07:16:23.351325+00:00"
+      "checked_at": "2026-08-12T09:07:28.367948+00:00"
     },
     "НГТУ (АВТФ) — 09.03.04 Программная инженерия (бюджет)": {
       "found": false,
       "rank": null,
-      "total": 44,
+      "total": 41,
       "quota": 5,
       "row": [],
       "url": "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.4&fk_tr_basis=1",
-      "checked_at": "2026-08-12T07:16:23.351325+00:00"
+      "checked_at": "2026-08-12T09:07:28.367948+00:00"
     },
     "НГТУ (АВТФ) — 10.03.01 Информационная безопасность (бюджет)": {
       "found": false,
       "rank": null,
-      "total": 46,
+      "total": 45,
       "quota": 5,
       "row": [],
       "url": "https://nstu.ru/entrance/enrollment_campaign/rating_bachelor/entrance_list?comp_name=АВТФ.5&fk_tr_basis=1",
-      "checked_at": "2026-08-12T07:16:23.351325+00:00"
+      "checked_at": "2026-08-12T09:07:28.367948+00:00"
     }
   }
 }
